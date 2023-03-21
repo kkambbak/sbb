@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,6 +48,13 @@ class SbbApplicationTests {
         q2.setContent("id는 자동으로 생성되나요?");
         q2.setCreateDate(LocalDateTime.now());
         this.questionRepository.save(q2);  // 두번째 질문 저장
+
+        //답변저장
+        Answer a = new Answer();
+        a.setContent("네 자동으로 생성됩니다.");
+        q2.addAnswer(a);
+        a.setCreateDate(LocalDateTime.now());
+        this.answerRepository.save(a);
     }
 
 
@@ -150,4 +158,17 @@ class SbbApplicationTests {
         assertEquals(2, a.getQuestion().getId());
     }
 
+    @Transactional
+    @Test
+    @DisplayName("질문에 달린 답변 찾기")
+    void t11() {
+        Optional<Question> oq = this.questionRepository.findById(2);
+        assertTrue(oq.isPresent());
+        Question q = oq.get();
+
+        List<Answer> answerList = q.getAnswerList();
+
+        assertEquals(1, answerList.size());
+        assertEquals("네 자동으로 생성됩니다.", answerList.get(0).getContent());
+    }
 }
