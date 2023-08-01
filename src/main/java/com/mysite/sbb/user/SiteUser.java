@@ -1,5 +1,7 @@
 package com.mysite.sbb.user;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +14,7 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class SiteUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
