@@ -1,6 +1,7 @@
 package com.mysite.sbb;
 
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.answer.AnswerService;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.answer.AnswerRepository;
 import com.mysite.sbb.question.QuestionRepository;
@@ -33,6 +34,9 @@ class SbbApplicationTests {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private AnswerService answerService;
+
     @BeforeEach // 각 테스트케이스가 실행되기 전에 실행된다.
     void beforeEach(){
         //모든 데이터 삭제
@@ -42,24 +46,15 @@ class SbbApplicationTests {
         answerRepository.clearAutoIncrement();
 
         //초기 데이터 설정
-        Question q1 = new Question();
-        q1.setSubject("sbb가 무엇인가요?");
-        q1.setContent("sbb에 대해서 알고 싶습니다.");
-        q1.setCreateDate(LocalDateTime.now());
-        this.questionRepository.save(q1);  // 첫번째 질문 저장
+        // TODO: user 부분 변경
+        Question q1 = questionService.create("sbb가 무엇인가요?", "sbb에 대해서 알고 싶습니다.", null);
+        questionRepository.save(q1);  // 첫번째 질문 저장
 
-        Question q2 = new Question();
-        q2.setSubject("스프링부트 모델 질문입니다.");
-        q2.setContent("id는 자동으로 생성되나요?");
-        q2.setCreateDate(LocalDateTime.now());
-        this.questionRepository.save(q2);  // 두번째 질문 저장
+        Question q2 = questionService.create("스프링부트 모델 질문입니다.", "id는 자동으로 생성되나요?", null);
+        questionRepository.save(q2);// 두번째 질문 저장
 
         //답변저장
-        Answer a = new Answer();
-        a.setContent("네 자동으로 생성됩니다.");
-        q2.addAnswer(a);
-        a.setCreateDate(LocalDateTime.now());
-        this.answerRepository.save(a);
+        q2.addAnswer(answerService.create(q2, "네 자동으로 생성됩니다."));
     }
 
 
@@ -67,11 +62,7 @@ class SbbApplicationTests {
     @DisplayName("test save")
     void t1(){
         // 질문 1개 생성
-        Question q = new Question();
-        q.setSubject("세계에서 가장 부유한 국가가 어디인가요?");
-        q.setContent("알고 싶습니다.");
-        q.setCreateDate(LocalDateTime.now());
-        questionRepository.save(q);
+        questionService.create("세계에서 가장 부유한 국가가 어디인가요?", "알고 싶습니다.", null);
 
         assertEquals("세계에서 가장 부유한 국가가 어디인가요?", questionRepository.findById(3).get().getSubject());
     }
@@ -125,8 +116,8 @@ class SbbApplicationTests {
         Optional<Question> oq = this.questionRepository.findById(1);
         assertTrue(oq.isPresent());
         Question q = oq.get();
-        q.setSubject("수정된 제목");
-        this.questionRepository.save(q);
+        Question modifiedQ = q.toBuilder().subject("수정된 제목").build();
+        questionRepository.save(modifiedQ);
     }
 
     @Test
@@ -147,11 +138,8 @@ class SbbApplicationTests {
         assertTrue(oq.isPresent());
         Question q = oq.get();
 
-        Answer a = new Answer();
-        a.setContent("네 자동으로 생성됩니다.");
-        a.setQuestion(q);  // 어떤 질문의 답변인지 알기위해서 Question 객체가 필요하다.
-        a.setCreateDate(LocalDateTime.now());
-        this.answerRepository.save(a);
+        answerService.create(q, "네 자동으로 생성됩니다.");
+        //assertThat
     }
 
     @Test

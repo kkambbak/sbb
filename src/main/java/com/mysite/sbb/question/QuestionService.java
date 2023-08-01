@@ -13,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,20 +28,21 @@ public class QuestionService {
 
     public Question getQuestion(Integer id) {
         Optional<Question> question = this.questionRepository.findById(id);
-        if (question.isPresent()) {
-            return question.get();
-        } else {
+        if (question.isEmpty()) {
             throw new DataNotFoundException("question not found");
         }
+
+            return question.get();
+
     }
 
-    public void create(String subject, String content, SiteUser user) {
-        Question q = new Question();
-        q.setSubject(subject);
-        q.setContent(content);
-        q.setAuthor(user);
-        q.setCreateDate(LocalDateTime.now());
-        this.questionRepository.save(q);
+    public Question create(String subject, String content, SiteUser user) {
+        Question q = Question.builder()
+            .subject(subject)
+            .content(content)
+            .author(user)
+            .build();
+        return questionRepository.save(q);
     }
 
     public Page<Question> getList(int page, String kw){
@@ -53,11 +53,12 @@ public class QuestionService {
         return this.questionRepository.findAll(spec, pageable);
     }
 
-    public void modify(Question question, String subject, String content){
-        question.setSubject(subject);
-        question.setContent(content);
-        question.setModifyDate(LocalDateTime.now());
-        this.questionRepository.save(question);
+    public Question modify(Question question, String subject, String content){
+        Question modifiedQuestion = question.toBuilder()
+            .subject(subject)
+            .content(content)
+            .build();
+        return questionRepository.save(modifiedQuestion);
     }
 
     public void delete(Question question) {

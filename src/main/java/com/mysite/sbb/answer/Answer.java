@@ -4,7 +4,10 @@ import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -13,8 +16,10 @@ import java.util.Set;
 
 
 @Getter
-@Setter
 @Entity
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +31,10 @@ public class Answer {
     @CreatedDate
     private LocalDateTime createDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Question question;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser author;
 
     private LocalDateTime modifyDate;

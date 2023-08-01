@@ -3,7 +3,10 @@ package com.mysite.sbb.question;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
@@ -12,8 +15,10 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
-@Setter
 @Entity
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,14 +34,16 @@ public class Question {
     private LocalDateTime createDate;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE)
+    @Builder.Default
     private List<Answer> answerList = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private SiteUser author;
 
-    public void addAnswer(Answer a) {
-        a.setQuestion(this);
-        answerList.add(a);
+    public Answer addAnswer(Answer a) {
+        Answer addedAnswer = a.toBuilder().question(this).build();
+        answerList.add(addedAnswer);
+        return addedAnswer;
     }
     private LocalDateTime modifyDate;
 

@@ -1,10 +1,11 @@
 package com.mysite.sbb.answer;
 
-
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,44 +14,49 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class AnswerService {
-    private final AnswerRepository answerRepository;
+	private final AnswerRepository answerRepository;
 
-    public void create(Question question, String content) {
-        Answer answer = new Answer();
-        answer.setContent(content);
-        answer.setCreateDate(LocalDateTime.now());
-        answer.setQuestion(question);
-        this.answerRepository.save(answer);
-    }
-    public Answer create(Question question, String content, SiteUser author) {
-        Answer answer = new Answer();
-        answer.setContent(content);
-        answer.setCreateDate(LocalDateTime.now());
-        answer.setQuestion(question);
-        answer.setAuthor(author);
-        this.answerRepository.save(answer);
-        return answer;
-    }
+	public Answer create(Question question, String content) {
+		Answer answer = Answer.builder()
+			.content(content)
+			.createDate(LocalDateTime.now())
+			.modifyDate(LocalDateTime.now())
+			.question(question)
+			.build();
+		return answerRepository.save(answer);
+	}
 
-    public Answer getAnswer(Integer id){
-        Optional<Answer> answer = this.answerRepository.findById(id);
-        if(answer.isPresent())
-            return answer.get();
-        else throw new DataNotFoundException("answer not found");
-    }
+	public Answer create(Question question, String content, SiteUser author) {
+        Answer answer = Answer.builder()
+            .content(content)
+            .createDate(LocalDateTime.now())
+            .modifyDate(LocalDateTime.now())
+            .question(question)
+            .author(author)
+            .build();
 
-    public void modify(Answer answer, String content){
-        answer.setContent(content);
-        answer.setModifyDate(LocalDateTime.now());
-        this.answerRepository.save(answer);
-    }
+        return answerRepository.save(answer);
+	}
 
-    public void delete(Answer answer) {
-        this.answerRepository.delete(answer);
-    }
+	public Answer getAnswer(Integer id) {
+		Optional<Answer> answer = answerRepository.findById(id);
+		if (answer.isEmpty())
+			throw new DataNotFoundException("answer not found");
+		return answer.get();
+	}
 
-    public void vote(Answer answer, SiteUser siteUser) {
-        answer.getVoter().add(siteUser);
-        this.answerRepository.save(answer);
-    }
+	public Answer modify(Answer answer, String content) {
+        //검증 필요?
+        Answer modifiedAnswer = answer.toBuilder().content(content).build();
+        return answerRepository.save(modifiedAnswer);
+	}
+
+	public void delete(Answer answer) {
+		answerRepository.delete(answer);
+	}
+
+	public void vote(Answer answer, SiteUser siteUser) {
+		answer.getVoter().add(siteUser);
+		answerRepository.save(answer);
+	}
 }
